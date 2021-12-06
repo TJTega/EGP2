@@ -776,6 +776,7 @@ public class UIManager : MonoBehaviour
 
                 break;
             case SessionType.head2head:
+                sessionSummary.totalWhGenerated = totalGeneratedWh;
                 for (int i = 0; i < currentSession.summary.teamTotalWhGenerated.Length; i++)
                 {
                     float teamTotalWhGenerated = 0;
@@ -892,7 +893,7 @@ public class UIManager : MonoBehaviour
         Summary sessionSummary = currentSession.summary;
 
         if (sessionEnd)
-            currentSession.summary.totalWhGenerated = totalGeneratedWh;
+            sessionSummary.totalWhGenerated = totalGeneratedWh;
 
         //Runs code depending on the session type
         switch (currentSession.sessionType)
