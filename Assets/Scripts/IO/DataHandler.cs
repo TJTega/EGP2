@@ -5,6 +5,7 @@ using System.IO.Ports;
 using UnityEngine.Events;
 using System.Threading;
 using UnityEngine.UI;
+using System.Linq;
 
 public enum ReadType
 {
@@ -73,21 +74,29 @@ public class DataHandler : MonoBehaviour
     /// </summary>
     private void SetStream()
     {
-        portText.text = port;
-        if (port != "COM1")
+        string[] ports = SerialPort.GetPortNames();
+        if (ports.Contains(port))
         {
-            //Set new data stream form port
-            stream = new SerialPort(port, 38400);
-            //Initialise new data class from the stream
-            data = new Data(stream);
-            //Set a read thread
-            data.readThread = new Thread(new ThreadStart(data.SerialRead));
-            //Set a write thread
-            data.writeThread = new Thread(new ThreadStart(data.SerialWrite));
-            //Start the read thread
-            data.readThread.Start();
-            //Start the write thread
-            data.writeThread.Start();
+            portText.text = port;
+            if (port != "COM1")
+            {
+                //Set new data stream form port
+                stream = new SerialPort(port, 38400);
+                //Initialise new data class from the stream
+                data = new Data(stream);
+                //Set a read thread
+                data.readThread = new Thread(new ThreadStart(data.SerialRead));
+                //Set a write thread
+                data.writeThread = new Thread(new ThreadStart(data.SerialWrite));
+                //Start the read thread
+                data.readThread.Start();
+                //Start the write thread
+                data.writeThread.Start();
+            }
+        }
+        else
+        {
+            Debug.LogError("Port doesn't exist");
         }
     }
 
@@ -120,7 +129,7 @@ public class DataHandler : MonoBehaviour
         if (dataSets.Length == 18)
         {
             //For each bike
-            for(int i = 0; i < 17; i++)
+            for (int i = 0; i < 17; i++)
             {
                 //Split bike data by '/'
                 string[] values = dataSets[i].Split('/');
@@ -128,15 +137,15 @@ public class DataHandler : MonoBehaviour
                 Bike current = bikes[i];
 
                 //Sets bike data
-                current.bikeNo = i+1;
+                current.bikeNo = i + 1;
                 current.wattsInstant = int.Parse(values[1]);
                 current.peakPower = int.Parse(values[2]);
                 current.whGenerated = float.Parse(values[3]) / 100;
-                current.vbatVoltage = (float.Parse(values[4])*2)/100;
-                current.ouputCurrent = float.Parse(values[5])/10;
+                current.vbatVoltage = (float.Parse(values[4]) * 2) / 100;
+                current.ouputCurrent = float.Parse(values[5]) / 10;
                 current.cadenceRPM = int.Parse(values[6]);
                 current.errorCode = int.Parse(values[7]);
-                
+
             }
         }
         //Returns error if data doesn't match
@@ -158,7 +167,7 @@ public class DataHandler : MonoBehaviour
         else if (readType == ReadType.raw)
         {
 
-            if (stream.IsOpen)
+            if (stream != null && stream.IsOpen)
             {
                 //portNotFoundError.SetActive(false);
                 //Passes data into ReadData() function
